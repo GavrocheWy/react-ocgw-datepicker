@@ -1,6 +1,6 @@
 {
-  "name": "react-ocgw-datepicker",
-  "version": "0.0.1",
+  "name": "@gavrochewy/react-ocgw-datepicker",
+  "version": "1.0.0",
   "description": "A react component library who provide a beautiful datepicker",
   "scripts": {
     "rollup": "rollup -c --bundleConfigAsCjs"
@@ -15,6 +15,7 @@
     "react": "^18.2.0",
     "rollup": "^4.1.4",
     "rollup-plugin-dts": "^6.1.0",
+    "rollup-plugin-postcss": "^4.0.2",
     "tslib": "^2.6.2",
     "typescript": "^5.2.2"
   },
@@ -22,8 +23,10 @@
   "module": "dist/esm/index.js",
   "files": [
     "dist"
-    
   ],
   "types": "dist/index.d.ts",
-  "type": "module"
+  "type": "module",
+  "publishConfig": {
+    "register": "https://npm.pkg.github.com/GavrocheWy"
+  }
 }

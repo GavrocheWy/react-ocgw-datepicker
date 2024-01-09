@@ -1,20 +1,10 @@
-interface DayDate {
-    day: number;
-    month: number;
-    year: number;
-    classes: string;
-    fullDate: Date;
-}
+import createDay from "./createDay"
 
-const createDay = function (day: number, month: number, year: number, classes: string): DayDate {
-    return {
-        day: day,
-        month: month,
-        year: year,
-        classes: classes,
-        fullDate: new Date(year, month, day)
-    }
-}
+/** Return an array of dates to be displayed in the Datepicker when the user navigates into the Datepicker component
+ * @param  {number} month
+ * @param  {number} year
+ * @return {Array}
+ */
 
 const updateDatepicker = function (month: number, year: number): Object[] {
 

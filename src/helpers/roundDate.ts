@@ -1,3 +1,9 @@
+/** Return a new Date object rounded down to day or month depending of the parameter
+ * @param  {Date} date
+ * @param  {string} period
+ * @return {Date}
+ */
+
 const roundDate = function (date: Date, period: string): any {
     if (!date || !period) return;
     switch (period) {

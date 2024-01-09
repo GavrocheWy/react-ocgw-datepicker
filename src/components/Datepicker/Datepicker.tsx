@@ -1,20 +1,29 @@
 import React from "react";
 import { useState, useEffect, useRef } from 'react'
 import './Datepicker.css';
-// // Helpers
-import formatDate from './helpers/formatDate'
-import updateDatepicker from './helpers/updateDatepicker'
-import isDateAllowed from './helpers/isDateAllowed'
-import isMonthAllowed from './helpers/isMonthAllowed'
-// // Options
-import MONTHS from './options/months'
-import DAYS from './options/days'
+import MONTHS from "../../options/months";
+import DAYS from "../../options/days";
+import formatDate from "../../helpers/formatDate";
+import updateDatepicker from "../../helpers/updateDatepicker";
+import isDateAllowed from "../../helpers/isDateAllowed";
+import isMonthAllowed from "../../helpers/isMonthAllowed";
 
-const Datepicker = (callback: any, initialDate: Date = new Date(), minDate: Date, maxDate: Date, inputClasses: string[]) => {
+interface DatepickerProps {
+    callback: any;
+    initialDate?: Date;
+    minDate: Date;
+    maxDate: Date;
+    inputClasses: string[];
+}
+
+/** Main component, display the datepicker and his interaction input
+ * @return {typeof JSX}
+ */
+
+const Datepicker: React.FC<DatepickerProps> = (props) => {
 
     const [isDatepickerOpen, setIsDatepickerOpen] = useState<Boolean>(false)
-    const [isDateConfigOpen, setIsDateConfigOpen] = useState<Boolean>(false)
-    const [selectedDate, setSelectedDate] = useState<Date>(initialDate ? initialDate : new Date())
+    const [selectedDate, setSelectedDate] = useState<Date>(props.initialDate ? props.initialDate : new Date())
     const [year, setYear] = useState<number>(selectedDate.getFullYear())
     const [month, setMonth] = useState<number>(selectedDate.getMonth())
     const [dates, setDates] = useState<Object[]>([])
@@ -27,14 +36,13 @@ const Datepicker = (callback: any, initialDate: Date = new Date(), minDate: Date
 
     // Change month and newYear when date is modified
     useEffect(() => {
-        if (!isDateAllowed(minDate, maxDate, selectedDate)) return;
-        callback && callback(selectedDate)
+        if (!isDateAllowed(props.minDate, props.maxDate, selectedDate)) return;
+        props.callback && props.callback(selectedDate)
         setFormattedSelectedDate(formatDate(selectedDate))
         setYear(selectedDate.getFullYear())
         setMonth(selectedDate.getMonth())
         setIsDatepickerOpen(false)
-        setIsDateConfigOpen(false)
-    }, [selectedDate, callback, minDate, maxDate])
+    }, [selectedDate, props.callback, props.minDate, props.maxDate])
 
     // Change datepicker display when month and year are modified
     useEffect(() => {
@@ -64,29 +72,29 @@ const Datepicker = (callback: any, initialDate: Date = new Date(), minDate: Date
 
     // Set next month
     const setNextDate = () => {
-        if (!nextYear || !nextMonth) return;
-        if (!isMonthAllowed(minDate, maxDate, nextYear, nextMonth)) return;
+        if (!nextYear || nextMonth === undefined) return;
+        if (!isMonthAllowed(props.minDate, props.maxDate, nextYear, nextMonth)) return;
         setMonth(nextMonth)
         setYear(nextYear)
     }
 
     // Set prev month
     const setPrevDate = () => {
-        if (!prevYear || !prevMonth) return;
-        if (!isMonthAllowed(minDate, maxDate, prevYear, prevMonth)) return;
+        if (!prevYear || prevMonth === undefined) return;
+        if (!isMonthAllowed(props.minDate, props.maxDate, prevYear, prevMonth)) return;
         setMonth(prevMonth)
         setYear(prevYear)
     }
 
     // Reset date
     const resetDate = () => {
-        setSelectedDate(initialDate ? initialDate : new Date())
+        setSelectedDate(props.initialDate ? props.initialDate : new Date())
         setFormattedSelectedDate('')
     }
 
     // Display Month label
     const displayMonthLabel = function (month: number): any {
-        if (!MONTHS || !month || !year) return;
+        if (!MONTHS || month === undefined || !year) return;
         const thisMonth = MONTHS.find(m => m.index === month)
         if (thisMonth) return thisMonth.label.substring(0, 3) + ' ' + year
     }
@@ -95,7 +103,7 @@ const Datepicker = (callback: any, initialDate: Date = new Date(), minDate: Date
         <React.Fragment>
             <div className='datepicker-wrapper'>
                 <input
-                    className={`${inputClasses} datepicker-input`}
+                    className={`${props.inputClasses} datepicker-input`}
                     type="text"
                     readOnly
                     value={formattedSelectedDate}
@@ -104,9 +112,9 @@ const Datepicker = (callback: any, initialDate: Date = new Date(), minDate: Date
                 {isDatepickerOpen &&
                     <aside ref={datepickerRef} className='datepicker'>
                         <header className='datepicker-header'>
-                            <div className={`datepicker-header__action prev ${(prevYear && prevMonth) && isMonthAllowed(minDate, maxDate, prevYear, prevMonth) ? 'allowed' : 'disallowed'}`} onClick={() => setPrevDate()}>&#60;</div>
-                            <h1 className='datepicker-header__title' onClick={() => setIsDateConfigOpen(!isDateConfigOpen)}>{displayMonthLabel(month)}</h1>
-                            <div className={`datepicker-header__action next ${(nextYear && nextMonth) && isMonthAllowed(minDate, maxDate, nextYear, nextMonth) ? 'allowed' : 'disallowed'}`} onClick={() => setNextDate()}>&#62;</div>
+                            <div className={`datepicker-header__action prev ${(prevYear && prevMonth !== undefined) && isMonthAllowed(props.minDate, props.maxDate, prevYear, prevMonth) ? 'allowed' : 'disallowed'}`} onClick={() => setPrevDate()}>&#60;</div>
+                            <h1 className='datepicker-header__title'>{displayMonthLabel(month)}</h1>
+                            <div className={`datepicker-header__action next ${(nextYear && nextMonth !== undefined) && isMonthAllowed(props.minDate, props.maxDate, nextYear, nextMonth) ? 'allowed' : 'disallowed'}`} onClick={() => setNextDate()}>&#62;</div>
                         </header>
                         <main className='datepicker-body'>
                             <div className='datepicker-body__date-selection'>
@@ -115,21 +123,21 @@ const Datepicker = (callback: any, initialDate: Date = new Date(), minDate: Date
                                 </ul>
                                 <ul className='datepicker-body__dates'>{dates.length && dates.map((date: any, i) => <li
                                     className={`
-                                    ${formatDate(date.fullDate) === formatDate(selectedDate) ? 'is-active' : ''} 
-                                    ${isDateAllowed(minDate, maxDate, date.fullDate) ? '' : 'not-allowed'}
-                                    ${formatDate(date.fullDate) === formatDate(new Date()) ? 'is-today' : ''} ${date.classes}`} onClick={() => isDateAllowed(minDate, maxDate, date.fullDate) && setSelectedDate(date.fullDate)
+                                ${formatDate(date.fullDate) === formatDate(selectedDate) ? 'is-active' : ''} 
+                                ${isDateAllowed(props.minDate, props.maxDate, date.fullDate) ? '' : 'not-allowed'}
+                                ${formatDate(date.fullDate) === formatDate(new Date()) ? 'is-today' : ''} ${date.classes}`} onClick={() => isDateAllowed(props.minDate, props.maxDate, date.fullDate) && setSelectedDate(date.fullDate)
                                     } key={`${i}-date`}>{date.day}</li>)}</ul>
                             </div>
-                            {isDateConfigOpen &&
-                                <div className='datepicker-body__date-config'></div>
-                            }
                         </main>
-                        <footer className='datepicker-footer'><div onClick={() => resetDate()} className='datepicker-footer__actions'>Reset date</div></footer>
+                        <footer className='datepicker-footer'>
+                            <div onClick={() => resetDate()} className='datepicker-footer__actions'>Reset date</div>
+                        </footer>
                     </aside>
                 }
             </div>
         </React.Fragment >
     )
+
 };
 
 export default Datepicker;
